@@ -3,14 +3,16 @@
 A React-based analytics dashboard that visualizes past sales data and forecasted future sales using bar charts. The project integrates with a backend API to upload CSV data and generate AI/ML-based forecasts.
 
 🚀 Features
+```
 📁 Upload sales CSV file
 📈 Visualize past sales (Bar Chart)
 🔮 View forecasted sales (Bar Chart)
 🔄 Real-time API integration (Flask backend)
 ⚡ Loading state handling
 📊 Clean separation of historical vs predicted data
-
+```
 🛠️ Tech Stack
+```
 Frontend
 React.js
 Chart.js
@@ -20,6 +22,7 @@ Backend (Expected)
 Python Flask / FastAPI
 Pandas
 ML Forecasting model (ARIMA / Prophet / custom model)
+```
 
 📂 Project Structure
 ```
