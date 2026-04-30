@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+model/*.pkl
+
+# Node
+node_modules/
+build/
+
+# Env
+.env
