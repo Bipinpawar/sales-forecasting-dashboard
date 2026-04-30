@@ -27,7 +27,7 @@ function App() {
   const [forecast, setForecast] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const API_URL = "https://sales-forecasting-dashboard-g6d4.onrender.com";
   // Upload
   const handleUpload = async () => {
     if (!file) return alert("Select file");
@@ -37,7 +37,7 @@ function App() {
 
     try {
       setLoading(true);
-      await axios.post("http://127.0.0.1:5000/upload", formData);
+      await axios.post(`${API_URL}/upload`, formData);
       alert("Upload successful");
     } catch (e) {
       console.error(e);
@@ -54,7 +54,7 @@ function App() {
     try {
       setLoading(true);
 
-      const res = await axios.post("http://127.0.0.1:5000/forecast", {
+      const res = await axios.post(`${API_URL}/forecast`, {
         days: Number(days),
       });
 
