@@ -9,6 +9,7 @@ CORS(app)
 
 # store processed data globally
 df = None
+rag_db = None
 
 # =========================
 # 🏠 HEALTH CHECK (IMPORTANT FOR RENDER)
@@ -22,7 +23,7 @@ def home():
 # =========================
 @app.route('/upload', methods=['POST'])
 def upload():
-    global df
+    global df, rag_db
 
     file = request.files.get('file')
     if not file:
@@ -55,6 +56,9 @@ def upload():
     df = df.set_index('date').asfreq('D')
     df['sales'] = df['sales'].fillna(0)
     df = df.reset_index()
+   
+   text_data = df.to_string()
+   rag_db = create_rag_db(text_data)
 
     return jsonify({
         "message": "File processed successfully!",
@@ -87,6 +91,24 @@ def forecast():
     return jsonify({
         "forecast": forecast_values.tolist(),
         "history": df_copy.to_dict(orient='records')
+    })
+
+# =========================
+# 🤖 RAG API
+# =========================
+@app.route('/ask', methods=['POST'])
+def ask():
+    global rag_db
+
+    if rag_db is None:
+        return jsonify({"error": "Upload data first"}), 400
+
+    question = request.json.get("question")
+
+    answer = ask_rag(rag_db, question)
+
+    return jsonify({
+        "answer": answer
     })
 
 # =========================

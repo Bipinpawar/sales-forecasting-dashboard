@@ -27,8 +27,16 @@ function App() {
   const [forecast, setForecast] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // 🧠 RAG states
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+
   const API_URL = "https://sales-forecasting-dashboard-g6d4.onrender.com";
-  // Upload
+
+  // =========================
+  // 📁 Upload
+  // =========================
   const handleUpload = async () => {
     if (!file) return alert("Select file");
 
@@ -47,7 +55,9 @@ function App() {
     }
   };
 
-  // Forecast
+  // =========================
+  // 📈 Forecast
+  // =========================
   const getForecast = async () => {
     if (!days) return alert("Enter days");
 
@@ -68,22 +78,45 @@ function App() {
     }
   };
 
-  // 📊 PAST DATA (BAR)
-  const pastLabels = history.map((d) => d.date);
-  const pastValues = history.map((d) => Number(d.sales));
+  // =========================
+  // 🧠 RAG QUERY
+  // =========================
+  const askQuestion = async () => {
+    if (!question) return alert("Ask something");
 
+    try {
+      setLoading(true);
+
+      const res = await axios.post(`${API_URL}/ask`, {
+        question,
+      });
+
+      setAnswer(res.data.answer);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to get answer");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =========================
+  // 📊 Past Chart
+  // =========================
   const pastChart = {
-    labels: pastLabels,
+    labels: history.map((d) => d.date),
     datasets: [
       {
         label: "Past Sales",
-        data: pastValues,
+        data: history.map((d) => Number(d.sales)),
         backgroundColor: "rgba(54, 162, 235, 0.6)",
       },
     ],
   };
 
-  // 🔮 FORECAST DATA (BAR)
+  // =========================
+  // 🔮 Forecast Chart
+  // =========================
   let forecastLabels = [];
   let forecastValues = [];
 
@@ -118,50 +151,95 @@ function App() {
   };
 
   return (
-    <div style={{ textAlign: "center", padding: 20 }}>
-      <h2>📊 Sales Dashboard</h2>
+    <div style={{ padding: 20, fontFamily: "Arial" }}>
+      <h1 style={{ textAlign: "center" }}>📊 Sales Intelligence Dashboard</h1>
 
-      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-      <button onClick={handleUpload} disabled={loading}>
-        Upload
-      </button>
+      {/* =========================
+          📁 Upload Section
+      ========================= */}
+      <div style={card}>
+        <h3>Upload Data</h3>
+        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+        <button onClick={handleUpload} disabled={loading} style={btn}>
+          Upload
+        </button>
+      </div>
 
-      <br /><br />
+      {/* =========================
+          📈 Forecast Section
+      ========================= */}
+      <div style={card}>
+        <h3>Forecast</h3>
+        <input
+          type="number"
+          placeholder="Forecast days"
+          value={days}
+          onChange={(e) => setDays(e.target.value)}
+        />
+        <button onClick={getForecast} disabled={loading} style={btn}>
+          Predict
+        </button>
+      </div>
 
-      <input
-        type="number"
-        placeholder="Forecast days"
-        value={days}
-        onChange={(e) => setDays(e.target.value)}
-      />
+      {/* =========================
+          🧠 RAG Section
+      ========================= */}
+      <div style={card}>
+        <h3>Ask Questions (RAG)</h3>
+        <input
+          type="text"
+          placeholder="e.g. What is average sales?"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          style={{ width: "60%" }}
+        />
+        <button onClick={askQuestion} style={btn}>
+          Ask
+        </button>
 
-      <button onClick={getForecast} disabled={loading}>
-        Predict
-      </button>
-
-      <br /><br />
+        {answer && (
+          <div style={{ marginTop: 10, background: "#f4f4f4", padding: 10 }}>
+            <strong>Answer:</strong> {answer}
+          </div>
+        )}
+      </div>
 
       {loading && <p>Loading...</p>}
 
-      {/* 📊 PAST CHART */}
+      {/* =========================
+          Charts
+      ========================= */}
       {history.length > 0 && (
-        <div style={{ width: "90%", margin: "auto" }}>
+        <div style={card}>
           <h3>📉 Past Sales</h3>
           <Bar data={pastChart} options={options} />
         </div>
       )}
 
-      <br />
-
-      {/* 🔮 FORECAST CHART */}
       {forecast.length > 0 && (
-        <div style={{ width: "90%", margin: "auto" }}>
-          <h3>🔮 Forecast Sales</h3>
+        <div style={card}>
+          <h3>🔮 Forecast</h3>
           <Bar data={forecastChart} options={options} />
         </div>
       )}
     </div>
   );
 }
+
+// 🎨 Simple Styles
+const card = {
+  background: "#fff",
+  padding: 20,
+  margin: "20px auto",
+  width: "90%",
+  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+  borderRadius: "10px",
+};
+
+const btn = {
+  marginLeft: 10,
+  padding: "6px 12px",
+  cursor: "pointer",
+};
 
 export default App;
