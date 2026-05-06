@@ -3,7 +3,7 @@ from flask_cors import CORS
 import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 import os
-from rag import create_rag_db, ask_rag, documents
+import rag
 
 app = Flask(__name__)
 CORS(app)
@@ -61,7 +61,7 @@ def upload():
 
     # 🔥 CREATE RAG DATA
     text_data = df.to_string(index=False)
-    create_rag_db(text_data)
+    rag.create_rag_db(text_data)
 
     return jsonify({
         "message": "File uploaded + RAG ready ✅",
@@ -101,12 +101,12 @@ def forecast():
 # =========================
 @app.route('/ask', methods=['POST'])
 def ask():
-    if not documents:
+    if not rag.documents:
         return jsonify({"error": "Please upload data first"}), 400
 
     question = request.json.get("question")
 
-    answer = ask_rag(question)
+    answer = rag.ask_rag(question)
 
     return jsonify({"answer": answer})
 

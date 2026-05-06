@@ -19,11 +19,21 @@ def create_rag_db(text_data):
 def ask_rag(question):
     global documents
 
-    # simple keyword match
+    if not documents:
+        return "No data available. Please upload file first."
+
+    if not question:
+        return "Please provide a question."
+
+    # 🔍 simple keyword match
     relevant_docs = [
         doc for doc in documents
         if any(word in doc.lower() for word in question.lower().split())
     ]
+
+    # ⚠️ fallback if nothing matched
+    if not relevant_docs:
+        relevant_docs = documents[:5]
 
     context = "\n".join(relevant_docs[:5])
 
@@ -35,16 +45,27 @@ Context:
 
 Question: {question}
 
-Answer clearly and based only on data:
+Answer clearly based only on the data:
 """
 
-    response = requests.post(
-        "https://api-inference.huggingface.co/models/google/flan-t5-base",
-        headers={"Authorization": f"Bearer {HF_API_KEY}"},
-        json={"inputs": prompt}
-    )
-
     try:
-        return response.json()[0]["generated_text"]
-    except:
-        return "Error generating response"
+        response = requests.post(
+            "https://api-inference.huggingface.co/models/google/flan-t5-base",
+            headers={
+                "Authorization": f"Bearer {HF_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={"inputs": prompt},
+            timeout=20
+        )
+
+        result = response.json()
+
+        # 🔥 Handle HF API errors properly
+        if isinstance(result, dict) and result.get("error"):
+            return f"HF Error: {result['error']}"
+
+        return result[0]["generated_text"]
+
+    except Exception as e:
+        return f"Error: {str(e)}"
