@@ -27,8 +27,8 @@ ChartJS.register(
 function App() {
   const [file, setFile] = useState(null);
   const [days, setDays] = useState("");
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
+  // const [question, setQuestion] = useState("");
+  // const [answer, setAnswer] = useState("");
   const [forecast, setForecast] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -68,20 +68,20 @@ function App() {
     }
   };
 
-  const askQuestion = async () => {
-    if (!question) return;
+  // const askQuestion = async () => {
+  //   if (!question) return;
 
-    try {
-      setLoading(true);
-      const res = await axios.post(`${API_URL}/ask`, {
-        question,
-      });
+  //   try {
+  //     setLoading(true);
+  //     const res = await axios.post(`${API_URL}/ask`, {
+  //       question,
+  //     });
 
-      setAnswer(res.data.answer);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setAnswer(res.data.answer);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Charts
   const pastChart = {
