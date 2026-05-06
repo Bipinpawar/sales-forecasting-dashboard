@@ -1,42 +1,19 @@
 import React, { useState } from "react";
 import { Bar } from "react-chartjs-2";
 import axios from "axios";
-
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-  Title,
-} from "chart.js";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-  Title
-);
+import "./App.css";
 
 function App() {
   const [file, setFile] = useState(null);
   const [days, setDays] = useState("");
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
   const [forecast, setForecast] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 🧠 RAG states
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
-
   const API_URL = "https://sales-forecasting-dashboard-g6d4.onrender.com";
 
-  // =========================
-  // 📁 Upload
-  // =========================
   const handleUpload = async () => {
     if (!file) return alert("Select file");
 
@@ -48,198 +25,129 @@ function App() {
       await axios.post(`${API_URL}/upload`, formData);
       alert("Upload successful");
     } catch (e) {
-      console.error(e);
       alert("Upload failed");
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================
-  // 📈 Forecast
-  // =========================
   const getForecast = async () => {
     if (!days) return alert("Enter days");
 
     try {
       setLoading(true);
-
       const res = await axios.post(`${API_URL}/forecast`, {
         days: Number(days),
       });
 
       setForecast(res.data.forecast || []);
       setHistory(res.data.history || []);
-    } catch (e) {
-      console.error(e);
-      alert("Forecast failed");
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================
-  // 🧠 RAG QUERY
-  // =========================
   const askQuestion = async () => {
-    if (!question) return alert("Ask something");
+    if (!question) return;
 
     try {
       setLoading(true);
-
       const res = await axios.post(`${API_URL}/ask`, {
         question,
       });
 
       setAnswer(res.data.answer);
-    } catch (e) {
-      console.error(e);
-      alert("Failed to get answer");
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================
-  // 📊 Past Chart
-  // =========================
+  // Charts
   const pastChart = {
     labels: history.map((d) => d.date),
     datasets: [
       {
         label: "Past Sales",
-        data: history.map((d) => Number(d.sales)),
-        backgroundColor: "rgba(54, 162, 235, 0.6)",
+        data: history.map((d) => d.sales),
+        backgroundColor: "#4f46e5",
       },
     ],
   };
-
-  // =========================
-  // 🔮 Forecast Chart
-  // =========================
-  let forecastLabels = [];
-  let forecastValues = [];
-
-  if (history.length && forecast.length) {
-    const lastDate = new Date(history[history.length - 1].date);
-
-    forecast.forEach((value, i) => {
-      const d = new Date(lastDate);
-      d.setDate(d.getDate() + i + 1);
-
-      forecastLabels.push(d.toISOString().split("T")[0]);
-      forecastValues.push(Number(value));
-    });
-  }
 
   const forecastChart = {
-    labels: forecastLabels,
+    labels: forecast.map((_, i) => `Day ${i + 1}`),
     datasets: [
       {
-        label: "Forecast Sales",
-        data: forecastValues,
-        backgroundColor: "rgba(255, 99, 132, 0.6)",
+        label: "Forecast",
+        data: forecast,
+        backgroundColor: "#ef4444",
       },
     ],
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: { position: "top" },
-    },
   };
 
   return (
-    <div style={{ padding: 20, fontFamily: "Arial" }}>
-      <h1 style={{ textAlign: "center" }}>📊 Sales Intelligence Dashboard</h1>
+    <div className="container">
+      <h1 className="title">📊 Sales Intelligence Dashboard</h1>
 
-      {/* =========================
-          📁 Upload Section
-      ========================= */}
-      <div style={card}>
+      {/* Upload */}
+      <div className="card">
         <h3>Upload Data</h3>
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-        <button onClick={handleUpload} disabled={loading} style={btn}>
-          Upload
-        </button>
+        <div className="row">
+          <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+          <button onClick={handleUpload}>Upload</button>
+        </div>
       </div>
 
-      {/* =========================
-          📈 Forecast Section
-      ========================= */}
-      <div style={card}>
+      {/* Forecast */}
+      <div className="card">
         <h3>Forecast</h3>
-        <input
-          type="number"
-          placeholder="Forecast days"
-          value={days}
-          onChange={(e) => setDays(e.target.value)}
-        />
-        <button onClick={getForecast} disabled={loading} style={btn}>
-          Predict
-        </button>
+        <div className="row">
+          <input
+            type="number"
+            placeholder="Forecast days"
+            value={days}
+            onChange={(e) => setDays(e.target.value)}
+          />
+          <button onClick={getForecast}>Predict</button>
+        </div>
       </div>
 
-      {/* =========================
-          🧠 RAG Section
-      ========================= */}
-      <div style={card}>
-        <h3>Ask Questions (RAG)</h3>
-        <input
-          type="text"
-          placeholder="e.g. What is average sales?"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          style={{ width: "60%" }}
-        />
-        <button onClick={askQuestion} style={btn}>
-          Ask
-        </button>
+      {/* Charts */}
+      <div className="charts">
+        {history.length > 0 && (
+          <div className="chart-card">
+            <h4>Past Sales</h4>
+            <Bar data={pastChart} />
+          </div>
+        )}
 
-        {answer && (
-          <div style={{ marginTop: 10, background: "#f4f4f4", padding: 10 }}>
-            <strong>Answer:</strong> {answer}
+        {forecast.length > 0 && (
+          <div className="chart-card">
+            <h4>Forecast</h4>
+            <Bar data={forecastChart} />
           </div>
         )}
       </div>
 
-      {loading && <p>Loading...</p>}
-
-      {/* =========================
-          Charts
-      ========================= */}
-      {history.length > 0 && (
-        <div style={card}>
-          <h3>📉 Past Sales</h3>
-          <Bar data={pastChart} options={options} />
+      {/* RAG */}
+      <div className="card">
+        <h3>Ask Questions (AI)</h3>
+        <div className="row">
+          <input
+            type="text"
+            placeholder="Ask something about your data..."
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+          />
+          <button onClick={askQuestion}>Ask</button>
         </div>
-      )}
 
-      {forecast.length > 0 && (
-        <div style={card}>
-          <h3>🔮 Forecast</h3>
-          <Bar data={forecastChart} options={options} />
-        </div>
-      )}
+        {answer && <div className="answer-box">{answer}</div>}
+      </div>
+
+      {loading && <p className="loading">Processing...</p>}
     </div>
   );
 }
-
-// 🎨 Simple Styles
-const card = {
-  background: "#fff",
-  padding: 20,
-  margin: "20px auto",
-  width: "90%",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-  borderRadius: "10px",
-};
-
-const btn = {
-  marginLeft: 10,
-  padding: "6px 12px",
-  cursor: "pointer",
-};
 
 export default App;
