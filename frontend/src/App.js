@@ -108,7 +108,7 @@ function App() {
 
   return (
     <div className="container">
-      <h1 className="title">📊 Sales Intelligence Dashboard</h1>
+      <h1 className="title">📊 Sales Forecasting Dashboard</h1>
 
       <div className="card">
         <h3>Upload Data</h3>
