@@ -24,7 +24,7 @@ def create_rag_db(text_data):
 
 
 # =========================
-# 🔹 ASK QUESTION (RAG)
+# 🔹 ASK RAG
 # =========================
 def ask_rag(db, question):
     docs = db.similarity_search(question, k=3)
@@ -34,7 +34,7 @@ def ask_rag(db, question):
     prompt = f"""
 You are a business data analyst.
 
-Analyze the following sales data and answer the question.
+Analyze the following data and answer clearly.
 
 DATA:
 {context}
@@ -42,7 +42,7 @@ DATA:
 QUESTION:
 {question}
 
-Give a short, clear, and useful answer.
+Answer:
 """
 
     try:
@@ -54,7 +54,7 @@ Give a short, clear, and useful answer.
         )
 
         if response.status_code != 200:
-            return f"Error from LLM: {response.text}"
+            return f"Error: {response.text}"
 
         return response.json()[0]["generated_text"]
 
