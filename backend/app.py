@@ -80,9 +80,9 @@ def upload():
     df = df.reset_index()
 
     # 🔥 CREATE RAG DB
-    text_data = df.to_string()
-    rag_db = create_rag_db(text_data)
-
+    text_data = df.to_string(index=False)
+    create_rag_db(text_data)
+    
     return jsonify({
         "message": "Upload successful & RAG ready",
         "records": len(df)
