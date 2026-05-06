@@ -3,18 +3,27 @@ import os
 
 HF_API_KEY = os.getenv("HF_API_KEY")
 
-# simple in-memory storage
+# global storage
 documents = []
 
+# =========================
+# CREATE RAG DATA
+# =========================
 def create_rag_db(text_data):
     global documents
-    documents = text_data.split("\n")  # split into lines
+    documents = text_data.split("\n")
 
+# =========================
+# ASK QUESTION
+# =========================
 def ask_rag(question):
     global documents
 
-    # 🔍 simple keyword match
-    relevant_docs = [doc for doc in documents if any(word in doc.lower() for word in question.lower().split())]
+    # simple keyword match
+    relevant_docs = [
+        doc for doc in documents
+        if any(word in doc.lower() for word in question.lower().split())
+    ]
 
     context = "\n".join(relevant_docs[:5])
 
@@ -26,7 +35,7 @@ Context:
 
 Question: {question}
 
-Answer clearly:
+Answer clearly and based only on data:
 """
 
     response = requests.post(
