@@ -3,6 +3,27 @@ import { Bar } from "react-chartjs-2";
 import axios from "axios";
 import "./App.css";
 
+// ✅ FIX START
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+  Title,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+  Title
+);
+// ✅ FIX END
+
 function App() {
   const [file, setFile] = useState(null);
   const [days, setDays] = useState("");
@@ -89,7 +110,6 @@ function App() {
     <div className="container">
       <h1 className="title">📊 Sales Intelligence Dashboard</h1>
 
-      {/* Upload */}
       <div className="card">
         <h3>Upload Data</h3>
         <div className="row">
@@ -98,7 +118,6 @@ function App() {
         </div>
       </div>
 
-      {/* Forecast */}
       <div className="card">
         <h3>Forecast</h3>
         <div className="row">
@@ -112,7 +131,6 @@ function App() {
         </div>
       </div>
 
-      {/* Charts */}
       <div className="charts">
         {history.length > 0 && (
           <div className="chart-card">
@@ -129,7 +147,6 @@ function App() {
         )}
       </div>
 
-      {/* RAG */}
       <div className="card">
         <h3>Ask Questions (AI)</h3>
         <div className="row">
