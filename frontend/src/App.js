@@ -147,7 +147,7 @@ function App() {
         )}
       </div>
 
-      <div className="card">
+      {/* <div className="card">
         <h3>Ask Questions (AI)</h3>
         <div className="row">
           <input
@@ -160,7 +160,7 @@ function App() {
         </div>
 
         {answer && <div className="answer-box">{answer}</div>}
-      </div>
+      </div> */}
 
       {loading && <p className="loading">Processing...</p>}
     </div>
