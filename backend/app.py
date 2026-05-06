@@ -4,19 +4,23 @@ import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 import os
 
+# 🔹 RAG imports
+from rag import create_rag_db, ask_rag
+
 app = Flask(__name__)
 CORS(app)
 
-# store processed data globally
 df = None
 rag_db = None
 
+
 # =========================
-# 🏠 HEALTH CHECK (IMPORTANT FOR RENDER)
+# 🏠 HEALTH CHECK
 # =========================
 @app.route('/')
 def home():
-    return "API is running successfully 🚀"
+    return "API is running 🚀"
+
 
 # =========================
 # 📁 UPLOAD API
@@ -30,17 +34,13 @@ def upload():
         return jsonify({"error": "No file uploaded"}), 400
 
     raw_df = pd.read_csv(file)
-
     raw_df.columns = [col.lower().strip() for col in raw_df.columns]
 
-    date_col = next((col for col in raw_df.columns if 'date' in col), None)
-    sales_col = next((col for col in raw_df.columns if any(k in col for k in ['sales','revenue','amount','price'])), None)
+    date_col = next((c for c in raw_df.columns if 'date' in c), None)
+    sales_col = next((c for c in raw_df.columns if any(k in c for k in ['sales','revenue','amount','price'])), None)
 
     if not date_col or not sales_col:
-        return jsonify({
-            "error": "Could not detect date/sales column",
-            "columns_found": raw_df.columns.tolist()
-        }), 400
+        return jsonify({"error": "Invalid columns"}), 400
 
     df = raw_df[[date_col, sales_col]].copy()
     df.columns = ['date', 'sales']
@@ -52,18 +52,19 @@ def upload():
     df = df.groupby('date').sum().reset_index()
     df = df.sort_values('date')
 
-    # Fill missing dates
     df = df.set_index('date').asfreq('D')
     df['sales'] = df['sales'].fillna(0)
     df = df.reset_index()
-   
-   text_data = df.to_string()
-   rag_db = create_rag_db(text_data)
+
+    # 🔥 CREATE RAG DB (IMPORTANT)
+    text_data = df.to_string()
+    rag_db = create_rag_db(text_data)
 
     return jsonify({
-        "message": "File processed successfully!",
-        "total_records": len(df)
+        "message": "File uploaded & RAG ready",
+        "records": len(df)
     })
+
 
 # =========================
 # 📈 FORECAST API
@@ -73,10 +74,9 @@ def forecast():
     global df
 
     if df is None:
-        return jsonify({"error": "Please upload data first"}), 400
+        return jsonify({"error": "Upload data first"}), 400
 
-    data = request.get_json()
-    days = int(data.get('days', 7))
+    days = int(request.json.get('days', 7))
 
     y = df['sales']
 
@@ -93,26 +93,26 @@ def forecast():
         "history": df_copy.to_dict(orient='records')
     })
 
+
 # =========================
-# 🤖 RAG API
+# 🧠 RAG API
 # =========================
 @app.route('/ask', methods=['POST'])
 def ask():
     global rag_db
 
-    if rag_db is None:
-        return jsonify({"error": "Upload data first"}), 400
+    question = request.json.get('question')
 
-    question = request.json.get("question")
+    if rag_db is None:
+        return jsonify({"answer": "Upload data first"})
 
     answer = ask_rag(rag_db, question)
 
-    return jsonify({
-        "answer": answer
-    })
+    return jsonify({"answer": answer})
+
 
 # =========================
-# 🚀 RUN APP (FIXED)
+# 🚀 RUN APP
 # =========================
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))

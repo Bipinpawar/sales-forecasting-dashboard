@@ -5,3 +5,9 @@ numpy
 scikit-learn
 statsmodels
 gunicorn
+requests
+python-dotenv
+langchain
+langchain-community
+sentence-transformers
+faiss-cpu
