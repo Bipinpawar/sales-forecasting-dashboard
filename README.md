@@ -52,4 +52,4 @@ Make sure your backend is running on:
 http://127.0.0.1:5000
 
 screenshot
-<img width="1886" height="867" alt="image" src="https://github.com/user-attachments/assets/8ecb3be7-f39b-41ae-b580-a11492522c33" />
+<img width="1780" height="878" alt="image" src="https://github.com/user-attachments/assets/4655f9df-5fe1-41ff-8634-455286b3347f" />
