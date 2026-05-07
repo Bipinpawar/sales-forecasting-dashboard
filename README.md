@@ -51,5 +51,5 @@ Make sure your backend is running on:
 
 http://127.0.0.1:5000
 
-screenshot
-<img width="1780" height="878" alt="image" src="https://github.com/user-attachments/assets/4655f9df-5fe1-41ff-8634-455286b3347f" />
+Screenshot
+<img width="1672" height="962" alt="image" src="https://github.com/user-attachments/assets/79636a48-3b7b-44c4-9706-b98ff50e7a3c" />
